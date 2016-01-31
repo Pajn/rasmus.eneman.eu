@@ -1,0 +1,41 @@
+{{#extend "base"}}
+
+  {{#content "header"}}
+
+    <div class="index-header">
+      <img src="/assets/bg/2219x998.JPG"
+           srcset="/assets/bg/1109x499.JPG 1109w, /assets/bg/2219x998.JPG 2219w, /assets/bg/original.JPG 4437w"
+           sizes="100vw">
+
+      <nav>
+        <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      </nav>
+
+      <div>
+        <h1>{{site.title}}</h1>
+        <h2>{{site.description}}</h2>
+      </div>
+    </div>
+
+  {{/content}}
+
+  {{#content "body"}}
+
+    {{#each collections.posts}}
+      <article class="post-excerpt">
+        <header>
+          <h2><a href="/{{permalink}}">{{title}}</a></h2>
+        </header>
+        <p>
+          {{limit 150 (stripTags excerpt)}}
+          <a class="read-more" href="/prerender-the-app-shell/">»</a>
+        </p>
+        <footer class="post-meta">
+          <time datetime="{{iso date}}">{{prettyDate date}}</time>
+        </footer>
+      </article>
+    {{/each}}
+
+  {{/content}}
+
+{{/extend}}

@@ -1,0 +1,48 @@
+{{#extend "base"}}
+
+  {{#content "title"}}{{title}}{{/content}}
+
+  {{#content "header"}}
+
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+  {{/content}}
+
+
+  {{#content "body"}}
+
+    <article {{#if lang}}lang="{{lang}}"{{/if}}>
+      <header>
+        <h1>{{title}}</h1>
+        <section class="post-meta in-post">
+          <time datetime="{{iso date}}">{{prettyDate date}}</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        {{{contents}}}
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: '{{site.url}}/{{permalink}}/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+  {{/content}}
+
+{{/extend}}
