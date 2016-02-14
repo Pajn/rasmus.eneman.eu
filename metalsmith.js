@@ -100,7 +100,7 @@ function rename(options) {
   };
 }
 
-Metalsmith(__dirname)
+const metalsmith = Metalsmith(__dirname)
   .metadata({
     site: {
       title: 'Rasmus Eneman',
@@ -166,17 +166,31 @@ Metalsmith(__dirname)
     omitIndex: true,
     priority: '0.8',
     modifiedProperty: 'date',
-  }))
-  // .use(watch({
-  //   paths: {
-  //     "assets/**/*": true,
-  //     "layouts/**/*": '**/*.html',
-  //     "src/**/*": true,
-  //   },
-  // }))
-  // .use(browserSync({
-  //   files: ['assets/**/*', 'layouts/**/*', 'src/**/*'],
-  // }))
-  .build(function(err){
-    if (err) throw err;
-  });
+  }));
+
+switch (process.argv[2]) {
+  case 'serve':
+    metalsmith
+      .use(watch({
+        paths: {
+          "assets/**/*": true,
+          "layouts/**/*": '**/*.html',
+          "src/**/*": true,
+        },
+      }))
+      .use(browserSync({
+        files: ['assets/**/*', 'layouts/**/*', 'src/**/*'],
+      }));
+    // Fall through
+  case 'build':
+    metalsmith.build(function(err){
+      if (err) throw err;
+    });
+    break;
+  default:
+    console.log(`
+      Usage:
+        build             To just build the site
+        serve             To start a server and watch for changes
+    `)
+}
