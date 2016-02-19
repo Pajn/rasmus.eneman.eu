@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Continuous Integration and Deployment to gh-pages</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Inconsolata:400,700|Roboto+Slab">
+
+    <link rel="canonical" href="https://rasmus.eneman.eu">
+    <meta name="referrer" content="origin">
+
+    <meta property="og:site_name" content="Rasmus Eneman">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rasmus Eneman">
+    <meta property="og:description" content="Studying web developer and politically interested">
+    <meta property="og:url" content="https://rasmus.eneman.eu">
+    <meta property="og:image" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rasmus Eneman">
+    <meta name="twitter:description" content="Studying web developer and politically interested">
+    <meta name="twitter:url" content="https://rasmus.eneman.eu">
+    <meta name="twitter:image:src" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <script src="//www.google-analytics.com/analytics.js" async></script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Website",
+  "publisher": "Rasmus Eneman",
+  "url": "https://rasmus.eneman.eu",
+  "image": "https://rasmus.eneman.euassets/bg/1109x499.JPG",
+  "description": "Studying web developer and politically interested"
+}
+    </script>
+
+    <link rel="alternate" type="application/rss+xml" title="Rasmus Eneman" href="https://rasmus.eneman.eurss/">
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51338401-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+
+    </header>
+    <main>
+      
+    <article >
+      <header>
+        <h1>Continuous Integration and Deployment to gh-pages</h1>
+        <section class="post-meta in-post">
+          <time datetime="2015-11-04T00:00:00.000Z">4 November 2015</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        <p>In the RIA course we will publish our application on Github using the gh-pages branch. I doesn’t like to include build artefacts or similar data in my source code repo, partly because it creates ugly and hard to read diffs (And I like to read them when I view the history) but mostly because they create merge conflicts that’s usually a pain to handle. To solve this I decided early on to develop on master and only publish the built version to gh-pages. However I doesn’t like manual labour, the flow of work, commiting, changing branch, building and commiting again doesn’t speak to me so I decided to try to setup Travis to handle the boring parts.</p>
+<p>The first and most important step in continuous deployment is continuous integration.</p>
+<blockquote>
+<p>Continuous Integration is the practice of merging development work with a Master/Trunk/Mainline branch constantly so that you can test changes, and test that changes work with other changes.</p>
+</blockquote>
+<p><a href="http://blog.assembla.com/AssemblaBlog/tabid/12618/bid/92411/Continuous-Delivery-vs-Continuous-Deployment-vs-Continuous-Integration-Wait-huh.aspx">Michael Chletsos</a></p>
+<p>This is important because if every change automatically is built and pushed to gh-pages, even if it blows up on the start page, it goes live for everyone to see. Embarrassing ;)</p>
+<p>Getting started with Travis as a CI is very simple for Javascript projects. Just go to travis.org and “activate” the repo and then create a <code>.travis.yml</code> file in the root of the repo with the content <code>language: node_js</code>.
+Travis will by default use <code>npm install</code> to install your dependencies and <code>npm test</code> to run your tests. If you want to modify the behaviour you can set <code>before_script</code> or <code>script</code> in <code>.travis.yml</code>.</p>
+<h2>Continuous Deployment</h2>
+<p>After Travis were set up as a CI I started to investigate how to use it for deployment. As this were new ground for me I needed to answer a few questions</p>
+<ol>
+<li>How do I run something if, and only if, the build has succeeded?</li>
+<li>How do I authorize against Github so that I can push?</li>
+<li>How do I make sure that not everyone in the world get push access as both the repo and the Travis output is open?</li>
+</ol>
+<p>The answer to question one were very easy, Travis has a <code>after_success</code> hook that can be added to the <code>.travis.yml</code> in the same way as <code>before_script</code> or <code>script</code>.</p>
+<p>In question two I got saved by Github having HTTP basic authorization support for its https url, meaning that the credentials can be added right to the url using the format <code>https://USERNAME:PASSWORD@github.com/REPO_OWNER/REPO_NAME.git</code>.</p>
+<p>Question three turned into several answers. First the password in the url can be replaced with a personal access token which you can get from Github and limit the access to only repo access. To keep the token secure I use an environment variable in Travis that is not logged to the output which can be set from the webpage.
+Third, as git logs the url to stdout on push I need to quiet it, the <code>--quiet</code> flag is not enough though as git will instead log it to stderr if some problem occurs. Therefore I used shell redirects instead. By putting <code>&gt; /dev/null 2&gt;&amp;1</code> behind the push command output to both stdout and stderr will be redirected to <code>/dev/null</code> and get thrown away.</p>
+<h3>Handling merge conflicts</h3>
+<p>I do not want to end up in a situation were there is an merge conflict and Travis because I have no way of solving it there.
+Thankfully I does not care about the history of the gh-pages branch which allows to remove that risk completely.
+On every deploy I will create a new repository on Travis, add the build artefacts and then forcefully push that to the gh-pages branch. This will make it look like there have only ever been one single commit to it, but I couldn’t care less :)
+Because a single bug could destroy the complete history of the master branch I went ahead and “protected” it before trying out the script, with that no direct pushes to master is allowed and every change must come in form of a PR that after verification of Travis can be merged using the Github interface.</p>
+<h3>Explanation of the script</h3>
+<p>I ended up calling a script, <code>deploy.sh</code> in <code>after_success</code> which part by part looks like this:</p>
+<pre><code class="language-bash"><span class="token keyword" >if</span> <span class="token punctuation" >[</span> <span class="token string" >"<span class="token variable" >$TRAVIS_BRANCH</span>"</span> <span class="token operator" >!=</span> <span class="token string" >"master"</span> <span class="token punctuation" >]</span>
+<span class="token keyword" >then</span>
+  <span class="token keyword" >exit</span> 0
+
+<span class="token keyword" >elif</span> <span class="token punctuation" >[</span> <span class="token string" >"<span class="token variable" >$TRAVIS_PULL_REQUEST</span>"</span> <span class="token operator" >!=</span> <span class="token string" >"false"</span> <span class="token punctuation" >]</span>
+<span class="token keyword" >then</span>
+  <span class="token keyword" >exit</span> 0
+<span class="token keyword" >fi</span>
+</code></pre>
+<p>This checks that the current build is on master and is not a pull request. This is because Travis will build all pull request but they should only be deployed after they have been merged.</p>
+<pre><code class="language-bash"><span class="token keyword" >set</span> -e
+npm run build
+<span class="token function" >cd</span> dist
+</code></pre>
+<p>I set up the script to end if any command errors, that is because I only want to deploy succeeded builds. After that I use the build specified in my <code>package.json</code> and navigate to the folder hosting its artefacts.</p>
+<pre><code class="language-bash"><span class="token function" >git</span> init
+<span class="token function" >git</span> checkout -b gh-pages
+<span class="token function" >git</span> config --global user.email <span class="token string" >"pie.or.paj@gmail.com"</span>
+<span class="token function" >git</span> config --global user.name <span class="token string" >"Travis"</span>
+<span class="token function" >git</span> remote add deploy <span class="token string" >"https://<span class="token variable" >$GITHUB_AUTH@github</span>.com/Pajn/Culinam.git"</span>
+</code></pre>
+<p>This creates a new git repository and changes it to the gh-pages branch. After that I configure user information in git which is required to commit. and finally I add the github repository as a remote named deploy. Notice the <code>$GITHUB_AUTH</code> which is where the Github credentials is specified from the environment variable.</p>
+<pre><code class="language-bash"><span class="token function" >git</span> add -A
+<span class="token function" >git</span> commit -am "Deploy of build <span class="token comment" spellcheck="true">#$TRAVIS_BUILD_NUMBER of commit $TRAVIS_COMMIT"</span>
+<span class="token function" >git</span> push deploy gh-pages --force <span class="token operator" >></span> /dev/null 2<span class="token operator" >></span><span class="token operator" >&amp;</span>1
+</code></pre>
+<p>Then I add all files and commits them. Travis sets environment variables with information on what is currently building, I use the in the commit message so I can see what version that have been deployed.
+Finally I push the commit to Github which will publish the build.</p>
+
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: 'https://rasmus.eneman.eu/continuous-integration-and-deployment-to-gh-pages/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+
+    </main>
+    <footer class="site-footer">
+      <section class="copyright">
+        <a href="https://rasmus.eneman.eu">Rasmus Eneman</a> © 2015
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>
+        Some rights reserved
+      </section>
+    </footer>
+  </body>
+</html>

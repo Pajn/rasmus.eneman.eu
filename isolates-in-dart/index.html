@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Isolates in Dart</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Inconsolata:400,700|Roboto+Slab">
+
+    <link rel="canonical" href="https://rasmus.eneman.eu">
+    <meta name="referrer" content="origin">
+
+    <meta property="og:site_name" content="Rasmus Eneman">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rasmus Eneman">
+    <meta property="og:description" content="Studying web developer and politically interested">
+    <meta property="og:url" content="https://rasmus.eneman.eu">
+    <meta property="og:image" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rasmus Eneman">
+    <meta name="twitter:description" content="Studying web developer and politically interested">
+    <meta name="twitter:url" content="https://rasmus.eneman.eu">
+    <meta name="twitter:image:src" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <script src="//www.google-analytics.com/analytics.js" async></script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Website",
+  "publisher": "Rasmus Eneman",
+  "url": "https://rasmus.eneman.eu",
+  "image": "https://rasmus.eneman.euassets/bg/1109x499.JPG",
+  "description": "Studying web developer and politically interested"
+}
+    </script>
+
+    <link rel="alternate" type="application/rss+xml" title="Rasmus Eneman" href="https://rasmus.eneman.eurss/">
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51338401-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+
+    </header>
+    <main>
+      
+    <article >
+      <header>
+        <h1>Isolates in Dart</h1>
+        <section class="post-meta in-post">
+          <time datetime="2014-09-14T00:00:00.000Z">14 September 2014</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        <p><a href="https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/dart-isolate.Isolate">Isolates</a> is a way to fire up another instance that is compleatly sepparate from the first except from message passing.</p>
+<p>Message passing is done through <a href="https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/dart-isolate.SendPort">SendPort</a> and <a href="https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/dart-isolate.ReceivePort">ReceivePort</a>. A SendPort can’t be created separately, it have to be requested from a ReceivePort. After that, a SendPort can only pass massage to the ReceivePort that created it.</p>
+<p>I will try to make this understandable using a simple example. The full example can be found on Github at <a href="https://github.com/Pajn/dart_isolate_example">https://github.com/Pajn/dart_isolate_example</a>. In this example I will create a simple command line application that reverses the input string. The reversion is done in a separate isolate.</p>
+<p>First, we spawn a new isolate from a separate file:</p>
+<pre><code class="language-dart"><span class="token keyword" >var</span> receivePort <span class="token operator" >=</span> <span class="token keyword" >new</span> <span class="token class-name" >ReceivePort</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token keyword" >var</span> uri <span class="token operator" >=</span> <span class="token keyword" >new</span> <span class="token class-name" >Uri<span class="token punctuation" >.</span>file</span><span class="token punctuation" >(</span><span class="token string" >'../lib/isolate.dart'</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+Isolate<span class="token punctuation" >.</span><span class="token function" >spawnUri</span><span class="token punctuation" >(</span>uri<span class="token punctuation" >,</span> <span class="token punctuation" >[</span><span class="token punctuation" >]</span><span class="token punctuation" >,</span> receivePort<span class="token punctuation" >.</span>sendPort<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>First we create a ReceivePort, we’ll get deaper into it later on. Then we creates a uri object that point to the file we want to launch. And lastly we spaw a new Isolate. The spawnUri method takes three arguments, the uri to the file we want to spawn, a list of cammand line arguments (in this example, none are passed) and a message to pass to the new isolate.
+The message looks quite special but really is simple, it’s just a object that is passed to the main function of our Isolate. In this case we pass the SendPort bound to the ReceivePort we just created, by doing this, the Isolate can pass messages to us.</p>
+<p>The message (our SendPort object) as well as the comand line arguments are passed to the isolates main function wich look like this:</p>
+<pre><code class="language-dart"><span class="token function" >main</span><span class="token punctuation" >(</span>_<span class="token punctuation" >,</span> SendPort sendPort<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token comment" spellcheck="true">// ...</span>
+<span class="token punctuation" >}</span>
+</code></pre>
+<p>The first argument is a List of the command line arguments, as we don’t care about them it’s named <code>_</code> to make that clear. The second argument is our message, wich is type annotated to make it clear that we want a SendPort object.</p>
+<p>Now may be a good time to deeper try to understand the receiveport and the SendPort. The SendPort is simple. It does only have a send method that takes a single argument, the message to send. It’s used like this:</p>
+<pre><code class="language-dart">sendPort<span class="token punctuation" >.</span><span class="token function" >send</span><span class="token punctuation" >(</span><span class="token string" >'Hello, World!'</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>The ReceivePort looks quite complex if we look it up but is too very simple. The reson that it have all those methods is becouse it implements a <a href="https://api.dartlang.org/apidocs/channels/be/dartdoc-viewer/dart-async.Stream">Stream</a>. If you know how a Stream works then great! If not, you’ll only need to care about the listen method, it is how you listen to the incoming messages from the ReceivePort.</p>
+<pre><code class="language-dart">receivePort<span class="token punctuation" >.</span><span class="token function" >listen</span><span class="token punctuation" >(</span><span class="token punctuation" >(</span>message<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token comment" spellcheck="true">// message is a copy of the object passed to sendPort.send</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>So now, our isolate has a SendPort object (which we passed to it when we spawned it) and our main script has a ReceivePort object that it created. This means that the Isolate can pass message to the main script, but not the other way around. To fix this, the Isolate need to create a ReceivePort object and pass its corresponding SendPort back to the main script.</p>
+<pre><code class="language-dart"><span class="token keyword" >var</span> receivePort <span class="token operator" >=</span> <span class="token keyword" >new</span> <span class="token class-name" >ReceivePort</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+sendPort<span class="token punctuation" >.</span><span class="token function" >send</span><span class="token punctuation" >(</span>receivePort<span class="token punctuation" >.</span>sendPort<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>After that it just for the main script to take care of that SendPort.</p>
+<pre><code class="language-dart">SendPort sendPort<span class="token punctuation" >;</span>
+
+receivePort<span class="token punctuation" >.</span><span class="token function" >listen</span><span class="token punctuation" >(</span><span class="token punctuation" >(</span>message<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span> <span class="token punctuation" >(</span>sendPort <span class="token operator" >==</span> <span class="token keyword" >null</span> <span class="token operator" >&amp;&amp;</span> message <span class="token operator" >is</span> SendPort<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        sendPort <span class="token operator" >=</span> message<span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>As we will pass other message than a single SendPort we check that we have not already received a SendPort and that the message actually is a SendPort.</p>
+<p>After this we have full two-way communication between the scripts!</p>
+<p>Before we go on an create full blown apps using this, it may be good to know that a message can’t be a object of any type. The limitations are (quoted from the Dart API spec)</p>
+<blockquote>
+<p>The content of message can be: primitive values (null, num, bool, double, String), instances of SendPort, and lists and maps whose elements are any of these.</p>
+</blockquote>
+<p>To create our revearsing string CLI tool, we first need to take care of the command line arguments.</p>
+<pre><code class="language-dart"><span class="token function" >main</span><span class="token punctuation" >(</span>List<span class="token operator" >&lt;</span>String<span class="token operator" >></span> args<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span> <span class="token punctuation" >(</span>args<span class="token punctuation" >.</span>length <span class="token operator" >&lt;</span> <span class="token number" >1</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        print <span class="token punctuation" >(</span><span class="token string" >'A message to pass to the isolate is needed'</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token function" >exit</span><span class="token punctuation" >(</span><span class="token number" >1</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+    <span class="token keyword" >var</span> userMessage <span class="token operator" >=</span> args<span class="token punctuation" >.</span><span class="token function" >join</span><span class="token punctuation" >(</span><span class="token string" >' '</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+
+    <span class="token comment" spellcheck="true">// ...</span>
+</code></pre>
+<p>As command line arguments are separated by space and we only want one string, it’s easiest to just join them with a space again.</p>
+<p>Then, we need to pass the userMassage to the Isolate so that it can reverse it. This can only be done after we have received a SendPort from the Isolate.</p>
+<pre><code class="language-dart">receivePort<span class="token punctuation" >.</span><span class="token function" >listen</span><span class="token punctuation" >(</span><span class="token punctuation" >(</span>message<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span> <span class="token punctuation" >(</span>sendPort <span class="token operator" >==</span> <span class="token keyword" >null</span> <span class="token operator" >&amp;&amp;</span> message <span class="token operator" >is</span> SendPort<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        sendPort <span class="token operator" >=</span> message<span class="token punctuation" >;</span>
+        sendPort<span class="token punctuation" >.</span><span class="token function" >send</span><span class="token punctuation" >(</span>userMessage<span class="token punctuation" >)</span>
+    <span class="token punctuation" >}</span>
+    <span class="token comment" spellcheck="true">// ...</span>
+</code></pre>
+<p>This is the same as the example above except that it sends the userMessage as soon as a SendPort is received.</p>
+<p>We also need to get the result back from the isolate</p>
+<pre><code class="language-dart">receivePort<span class="token punctuation" >.</span><span class="token function" >listen</span><span class="token punctuation" >(</span><span class="token punctuation" >(</span>message<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span> <span class="token punctuation" >(</span>sendPort <span class="token operator" >==</span> <span class="token keyword" >null</span> <span class="token operator" >&amp;&amp;</span> message <span class="token operator" >is</span> SendPort<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        sendPort <span class="token operator" >=</span> message<span class="token punctuation" >;</span>
+        sendPort<span class="token punctuation" >.</span><span class="token function" >send</span><span class="token punctuation" >(</span>userMessage<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span> <span class="token keyword" >else</span> <span class="token keyword" >if</span> <span class="token punctuation" >(</span>message <span class="token operator" >is</span> String<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token function" >print</span><span class="token punctuation" >(</span>message<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token function" >exit</span><span class="token punctuation" >(</span><span class="token number" >0</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>To make sure that we don’t missbehave if the Isolate does, we check that the message is a String. If so, we print it and exit.</p>
+<p>Now our main script is done and the only thing left to do is to make sure the Isolate reverses and sends back Strings.</p>
+<pre><code class="language-dart">receivePort<span class="token punctuation" >.</span><span class="token function" >listen</span><span class="token punctuation" >(</span><span class="token punctuation" >(</span>String message<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span> <span class="token punctuation" >(</span>message <span class="token operator" >is</span> String<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token keyword" >var</span> reversedMessage <span class="token operator" >=</span> message<span class="token punctuation" >.</span><span class="token function" >split</span><span class="token punctuation" >(</span><span class="token string" >''</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>reversed<span class="token punctuation" >.</span><span class="token function" >join</span><span class="token punctuation" >(</span><span class="token string" >''</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        sendPort<span class="token punctuation" >.</span><span class="token function" >send</span><span class="token punctuation" >(</span>reversedMessage<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>And now we are done! We can se our simple program work</p>
+<pre><code>dart main.dart Hello, World!
+!dlroW ,olleH
+</code></pre>
+<p>Again, see <a href="https://github.com/Pajn/dart_isolate_example">Github</a> for the full source code.</p>
+
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: 'https://rasmus.eneman.eu/isolates-in-dart/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+
+    </main>
+    <footer class="site-footer">
+      <section class="copyright">
+        <a href="https://rasmus.eneman.eu">Rasmus Eneman</a> © 2015
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>
+        Some rights reserved
+      </section>
+    </footer>
+  </body>
+</html>

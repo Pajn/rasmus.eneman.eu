@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Performance and React</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Inconsolata:400,700|Roboto+Slab">
+
+    <link rel="canonical" href="https://rasmus.eneman.eu">
+    <meta name="referrer" content="origin">
+
+    <meta property="og:site_name" content="Rasmus Eneman">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rasmus Eneman">
+    <meta property="og:description" content="Studying web developer and politically interested">
+    <meta property="og:url" content="https://rasmus.eneman.eu">
+    <meta property="og:image" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rasmus Eneman">
+    <meta name="twitter:description" content="Studying web developer and politically interested">
+    <meta name="twitter:url" content="https://rasmus.eneman.eu">
+    <meta name="twitter:image:src" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <script src="//www.google-analytics.com/analytics.js" async></script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Website",
+  "publisher": "Rasmus Eneman",
+  "url": "https://rasmus.eneman.eu",
+  "image": "https://rasmus.eneman.euassets/bg/1109x499.JPG",
+  "description": "Studying web developer and politically interested"
+}
+    </script>
+
+    <link rel="alternate" type="application/rss+xml" title="Rasmus Eneman" href="https://rasmus.eneman.eurss/">
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51338401-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+
+    </header>
+    <main>
+      
+    <article >
+      <header>
+        <h1>Performance and React</h1>
+        <section class="post-meta in-post">
+          <time datetime="2015-11-23T00:00:00.000Z">23 November 2015</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        <p>An old blog post from Paul Lewis, <a href="https://aerotwist.com/blog/react-plus-performance-equals-what/">React + Performace = ?</a> were brought up in the Facebook group <em>Kodapor</em>. In this post Paul describes how he have benchmarked React against vanilla JavaScript and we could sadly see that the performance of React was much worse than its vanilla counterpart.</p>
+<p>I decided that I should redo the benchmark with two following modifications:</p>
+<ol>
+<li>The latest version of React (0.14.3)</li>
+<li>shouldComponentUpdate</li>
+</ol>
+<p><code>shouldComponentUpdate</code> is a method which can be added to a component, and if it exists React will consult it whenever a component should be updated or not. This can, according to the <a href="https://facebook.github.io/react/docs/advanced-performance.html">React documentation</a> make things faster.
+I’m using the exact same benchmark as Paul for the vanilla and 0.13 test. For 0.13 with <code>shouldComponentUpdate</code> I only added</p>
+<pre><code class="language-js">shouldComponentUpdate<span class="token punctuation" >:</span> <span class="token keyword" >function</span><span class="token punctuation" >(</span>nextProps<span class="token punctuation" >,</span> nextState<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+  <span class="token keyword" >return</span> <span class="token keyword" >this</span><span class="token punctuation" >.</span>props<span class="token punctuation" >.</span>image <span class="token operator" >!==</span> nextProps<span class="token punctuation" >.</span>image<span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >,</span>
+</code></pre>
+<p>to the FlickrImage component and</p>
+<pre><code class="language-js">shouldComponentUpdate<span class="token punctuation" >:</span> <span class="token keyword" >function</span><span class="token punctuation" >(</span>nextProps<span class="token punctuation" >,</span> nextState<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+  <span class="token keyword" >return</span> <span class="token keyword" >this</span><span class="token punctuation" >.</span>state<span class="token punctuation" >.</span>data <span class="token operator" >!==</span> nextState<span class="token punctuation" >.</span>data<span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >,</span>
+</code></pre>
+<p>to the FlickrImages component. For the 0.14 tests I added the react-dom script tag and changed <code>React.render</code> to <code>ReactDOM.render</code>. Those are the only modifications done to the original code from Paul. I run all tests on my Nexus 5 using Chrome 46.</p>
+<h4>The latest version of React</h4>
+<p>So are there any optimizations in the newer version of React?
+<img src="/assets/images/2015/11/image.png" alt="">
+The latest version seems a bit better, but we are still far of vanilla js.</p>
+<h4>shouldComponentUpdate?</h4>
+<p><img src="/assets/images/2015/11/image-1-.png" alt="">
+While <code>shouldComponentUpdate</code> is faster with many components on the page, it seems to be much slower with only a few components which isn’t very good… Why it turns out this way I don’t know but I reproduce the results every time I run the tests so they seem stable.</p>
+<h4>The best of both worlds?</h4>
+<p>So what happens if we use the latest version of React together with <code>shouldComponentUpdate</code>?
+<img src="/assets/images/2015/11/image-3-.png" alt="">
+Good things, it turn out. Not only got we rid of that huge bumb with a few components but we also beat vanilla JS when we reached 800 components.</p>
+<h3>Conclusions</h3>
+<p>It seems like Pauls conclusion that React has significant costs, especially on mobile is no longer valid. From this simple test React seems to close the gap on vanilla.
+However I don’t know if the benchmark hits a golden and now optimized line. Maybe we’ll fall of the optimization if more functionality is added?
+With the <code>shouldComponentUpdate</code> results on 0.13 it’s clear that the mantra “always test” is true, a feature that in theory should give higher performance did instead cost very much until the amount of components increased.</p>
+<p>Even if these results are not valid for the general apps out there it’s interesting to see how much the performance have improved and I wish to see new benchmarks that find new problems for the React team to solve.</p>
+
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: 'https://rasmus.eneman.eu/performance-and-react/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+
+    </main>
+    <footer class="site-footer">
+      <section class="copyright">
+        <a href="https://rasmus.eneman.eu">Rasmus Eneman</a> © 2015
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>
+        Some rights reserved
+      </section>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Prerender the app shell</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Inconsolata:400,700|Roboto+Slab">
+
+    <link rel="canonical" href="https://rasmus.eneman.eu">
+    <meta name="referrer" content="origin">
+
+    <meta property="og:site_name" content="Rasmus Eneman">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rasmus Eneman">
+    <meta property="og:description" content="Studying web developer and politically interested">
+    <meta property="og:url" content="https://rasmus.eneman.eu">
+    <meta property="og:image" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rasmus Eneman">
+    <meta name="twitter:description" content="Studying web developer and politically interested">
+    <meta name="twitter:url" content="https://rasmus.eneman.eu">
+    <meta name="twitter:image:src" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <script src="//www.google-analytics.com/analytics.js" async></script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Website",
+  "publisher": "Rasmus Eneman",
+  "url": "https://rasmus.eneman.eu",
+  "image": "https://rasmus.eneman.euassets/bg/1109x499.JPG",
+  "description": "Studying web developer and politically interested"
+}
+    </script>
+
+    <link rel="alternate" type="application/rss+xml" title="Rasmus Eneman" href="https://rasmus.eneman.eurss/">
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51338401-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+
+    </header>
+    <main>
+      
+    <article >
+      <header>
+        <h1>Prerender the app shell</h1>
+        <section class="post-meta in-post">
+          <time datetime="2015-11-26T00:00:00.000Z">26 November 2015</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        <p>I’m continuing my course on examining the performance optimisations that can be done on a React application. This time I have looked at load time. With a client rendered application the browser first have to fetch the HTML, parse it to find out the CSS and Javascript to get, fetch those and then run the Javascript which will render the page. During all of this, the user will look at a white page.
+So how can we improve it?</p>
+<p>Lets examine what is taking time:
+If the markup needed to render the page is included in the HTML, the browser doesn’t need to first run the Javascript to figure out what to render. And if it doesn’t need to run the Javascript, it doesn’t even need to wait for it to download. If the CSS needed to render the page is included in the HTML as well it doesn’t even need to wait for the CSS to download and can start to render the page as soon as it gets the HTML.</p>
+<p>React supports server side rendering which can be used to produce the needed markup, however we are hosting our projects on gh-pages so we have no possibility to run code on the server. What we do have the possibility to do however is to run code in the build process, which means that we can prerender the application there.
+In the build process we have no knowledge of the application data or route the user visited so the only thing we can prerender is the application shell, the parts of the application that stays the same between all pages. For my project the application shell is a basic menu and a background color.</p>
+<p>As I’m using inline CSS in the Javascript, the CSS wont be an issue. In the rendered markup the CSS will be included in style attributes and only CSS required for that first render will be included which is important for file size.</p>
+<p>To render my application offline I needed to do some changes to the setup. First I needed to extract the route configuration, so I changed</p>
+<pre><code class="language-jsx"><span class="token function" >render</span><span class="token punctuation" >(</span>
+  <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Router</span><span class="token punctuation" >></span></span>
+    <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>/<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>App<span class="token punctuation" >}</span></span><span class="token punctuation" >></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>IndexRedirect</span> <span class="token attr-name" >to</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>/kitchen<span class="token punctuation" >'</span></span> <span class="token punctuation" >/></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>cashier<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Cashier<span class="token punctuation" >}</span></span><span class="token punctuation" >></span></span>
+        <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>dishes<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Dishes<span class="token punctuation" >}</span></span> <span class="token punctuation" >/></span></span>
+        <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>drinks<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Drinks<span class="token punctuation" >}</span></span> <span class="token punctuation" >/></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Route</span><span class="token punctuation" >></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>kitchen<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Kitchen<span class="token punctuation" >}</span></span> <span class="token punctuation" >/></span></span>
+    <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Route</span><span class="token punctuation" >></span></span>
+  <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Router</span><span class="token punctuation" >></span></span><span class="token punctuation" >,</span>
+  document<span class="token punctuation" >.</span><span class="token function" >getElementById</span><span class="token punctuation" >(</span><span class="token string" >'app'</span><span class="token punctuation" >)</span>
+<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>to</p>
+<pre><code class="language-jsx"><span class="token keyword" >export</span> <span class="token keyword" >function</span> <span class="token function" >routes</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+  <span class="token keyword" >return</span> <span class="token punctuation" >(</span>
+    <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>/<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>App<span class="token punctuation" >}</span></span><span class="token punctuation" >></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>IndexRedirect</span> <span class="token attr-name" >to</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>/kitchen<span class="token punctuation" >'</span></span> <span class="token punctuation" >/></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>cashier<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Cashier<span class="token punctuation" >}</span></span><span class="token punctuation" >></span></span>
+        <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>dishes<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Dishes<span class="token punctuation" >}</span></span> <span class="token punctuation" >/></span></span>
+        <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>drinks<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Drinks<span class="token punctuation" >}</span></span> <span class="token punctuation" >/></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Route</span><span class="token punctuation" >></span></span>
+      <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Route</span> <span class="token attr-name" >path</span><span class="token attr-value" ><span class="token punctuation" >=</span><span class="token punctuation" >'</span>kitchen<span class="token punctuation" >'</span></span> <span class="token attr-name" >component</span><span class="token script language-javascript" ><span class="token punctuation" >=</span><span class="token punctuation" >{</span>Kitchen<span class="token punctuation" >}</span></span> <span class="token punctuation" >/></span></span>
+    <span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Route</span><span class="token punctuation" >></span></span>
+  <span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token function" >render</span><span class="token punctuation" >(</span><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Router</span><span class="token punctuation" >></span></span><span class="token punctuation" >{</span><span class="token function" >routes</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >}</span><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Router</span><span class="token punctuation" >></span></span><span class="token punctuation" >,</span> document<span class="token punctuation" >.</span><span class="token function" >getElementById</span><span class="token punctuation" >(</span><span class="token string" >'app'</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>This makes it possible to reuse the same routes in the build process or on a server. I also needed to make sure that React didn’t try to render itself to a DOM that doesn’t exist so I had to guard the render statement so that it’s only executed in a browser. I did that by checking for the existence of a document</p>
+<pre><code class="language-jsx"><span class="token keyword" >if</span> <span class="token punctuation" >(</span>window<span class="token punctuation" >.</span>document<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+  <span class="token function" >render</span><span class="token punctuation" >(</span><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;</span>Router</span><span class="token punctuation" >></span></span><span class="token punctuation" >{</span><span class="token function" >routes</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >}</span><span class="token tag" ><span class="token tag" ><span class="token punctuation" >&lt;/</span>Router</span><span class="token punctuation" >></span></span><span class="token punctuation" >,</span> document<span class="token punctuation" >.</span><span class="token function" >getElementById</span><span class="token punctuation" >(</span><span class="token string" >'app'</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+</code></pre>
+<p>As react-router have support have for server side routing it’s easy to tell it to render a special route that only display the application shell and nothing else.</p>
+<pre><code class="language-jsx"><span class="token keyword" >import</span> <span class="token punctuation" >{</span>match<span class="token punctuation" >,</span> RoutingContext<span class="token punctuation" >}</span> <span class="token keyword" >from</span> <span class="token string" >'react-router'</span><span class="token punctuation" >;</span>
+<span class="token keyword" >import</span> <span class="token punctuation" >{</span>renderToString<span class="token punctuation" >}</span> <span class="token keyword" >from</span> <span class="token string" >'react-dom/server'</span><span class="token punctuation" >;</span>
+<span class="token keyword" >import</span> <span class="token punctuation" >{</span>routes<span class="token punctuation" >}</span> <span class="token keyword" >from</span> <span class="token string" >'../.tmp/ts/index.js'</span><span class="token punctuation" >;</span>
+
+<span class="token function" >match</span><span class="token punctuation" >(</span><span class="token punctuation" >{</span>routes<span class="token punctuation" >:</span> <span class="token function" >routes</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span> location<span class="token punctuation" >:</span> <span class="token string" >'/shell'</span><span class="token punctuation" >}</span><span class="token punctuation" >,</span> <span class="token punctuation" >(</span>error<span class="token punctuation" >,</span> redirectLocation<span class="token punctuation" >,</span> renderProps<span class="token punctuation" >)</span> <span class="token operator" >=</span><span class="token operator" >></span> <span class="token punctuation" >{</span>
+  console<span class="token punctuation" >.</span><span class="token function" >log</span><span class="token punctuation" >(</span><span class="token function" >renderToString</span><span class="token punctuation" >(</span><span class="token operator" >&lt;</span>RoutingContext <span class="token punctuation" >{</span><span class="token punctuation" >.</span><span class="token punctuation" >.</span><span class="token punctuation" >.</span>renderProps<span class="token punctuation" >}</span> <span class="token operator" >/</span><span class="token operator" >></span><span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>That was the basic concepts I went though to get the prerender working. Just ask if you want more details, I’m more interested in if the load time improved and how much? I used <a href="http://www.webpagetest.org/">Webpagetest</a> to measure to load times with the default settings of location Dallas and browser Chrome.
+The numbers I got, before:
+<img src="/assets/images/2015/11/before.png" alt="">
+and after:
+<img src="/assets/images/2015/11/after.png" alt="">
+Look at the start render numbers, it’s cut in half for the first view and is nearly instant for repeated views (I’ll get to that later). The load time went up a bit because now there are a bit more data to download as the JS bundle still contains all logic for rendering the shell. The number lie a bit though as we can see on the first byte numbers, because I have made no changes to the server they should be the same. But reality is never perfect and network conditions change so the load time numbers look a bit worse than they actually are.</p>
+<p>But what are in that start render? It can be seen by disabling the Javascript
+<img src="/assets/images/2015/11/Screen-Shot-2015-11-26-at-13-00-40.png" alt="">
+While that isn’t perfect it’s a lot better than a fully white page. The time until the application is usable haven’t changed however, for that the JS still needs to run. But the load will feel faster for a user. A server side renderd version would be better though as it could render the full markup for the requested page and not just the shell.</p>
+<h3>Repeated views</h3>
+<p>As can be seen in the numbers above, the repeated view is much faster than the first one. Why is that?
+It’s because I have added the <a href="https://github.com/NekR/offline-plugin/">offline-loader</a> Webpack plugin which will produce an appcache manifest and a service worker that will store the application so that it can be used offline, without internet access. This also removes the need for the browser to download all resources when online and can start to render the application instantly.</p>
+<h3>Further info</h3>
+<p>If you are interested in the subject of load time I can highly recommend the video <a href="https://www.youtube.com/watch?v=d5_6yHixpsQ">Supercharging page load (100 Days of Google Dev)</a> with Jake Archibald for details on how he made an webapp with great load time performance. As well as the talk <a href="https://www.youtube.com/watch?v=_yCz1TA0EL4">You should use [insert library/framework], it’s the bestestest!</a> with Paul Lewis that touches the subject of what we give up to use a framework.</p>
+
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: 'https://rasmus.eneman.eu/prerender-the-app-shell/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+
+    </main>
+    <footer class="site-footer">
+      <section class="copyright">
+        <a href="https://rasmus.eneman.eu">Rasmus Eneman</a> © 2015
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>
+        Some rights reserved
+      </section>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>I don&#x27;t like classes</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Inconsolata:400,700|Roboto+Slab">
+
+    <link rel="canonical" href="https://rasmus.eneman.eu">
+    <meta name="referrer" content="origin">
+
+    <meta property="og:site_name" content="Rasmus Eneman">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rasmus Eneman">
+    <meta property="og:description" content="Studying web developer and politically interested">
+    <meta property="og:url" content="https://rasmus.eneman.eu">
+    <meta property="og:image" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rasmus Eneman">
+    <meta name="twitter:description" content="Studying web developer and politically interested">
+    <meta name="twitter:url" content="https://rasmus.eneman.eu">
+    <meta name="twitter:image:src" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <script src="//www.google-analytics.com/analytics.js" async></script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Website",
+  "publisher": "Rasmus Eneman",
+  "url": "https://rasmus.eneman.eu",
+  "image": "https://rasmus.eneman.euassets/bg/1109x499.JPG",
+  "description": "Studying web developer and politically interested"
+}
+    </script>
+
+    <link rel="alternate" type="application/rss+xml" title="Rasmus Eneman" href="https://rasmus.eneman.eurss/">
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51338401-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+
+    </header>
+    <main>
+      
+    <article >
+      <header>
+        <h1>I don&#x27;t like classes</h1>
+        <section class="post-meta in-post">
+          <time datetime="2015-12-16T00:00:00.000Z">16 December 2015</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        <p>I started programming for normal computers using Python and were later introduced to Java.
+While I have changed my views massively since that time there is one thing that only
+recently have started to change, which is my view on classes. Classes is one of the very few
+things I have missed in Javascript from my time with Java.<br>
+However, Typescript have taught me a valuable lesson. What I like isn’t classes it’s a place in
+the code that I can go to and look at a description of how the objects will look and behave.
+I believe that I have made this misconception because of how classes are taught. I bet you
+that you were introduced to classes in a very similar way as me, something similar to</p>
+<blockquote>
+<p>Classes are like a blueprint for objects. They describe how objects of that class look and behave.</p>
+</blockquote>
+<p>This is sounds exactly as the thing that I like, but yet I don’t like classes, why? Because that
+statement is simply not true. Sure, classes do that too but their main usage is as factory.
+The class not only describes how objects of that class look and behave, it’s the only way to
+create objects of that class. Even if you create objects that look and behave in the same way, they
+are no good if they aren’t created from that class. This is important as it makes your code much
+more complicated and filled with boilerplate than what’s needed.</p>
+<p>For classical languages you’ll need complicated libraries making use of reflection to map objects
+to different things. I created one of those myself to map Dart objects to a database. And then
+you’ll need a different library to serve that object over a Websocket or a REST API. In JS or TS
+however you’ll just need <code>JSON.stringify</code> or similar construct. And to what use? TS have interfaces
+which fulfill exactly the same need of a single place I can look at to see how the object look and
+behave without have to use that as a factory every time I want an object.</p>
+<p>Of course classes aren’t completely useless. The factory problem is only a problem for entity
+classes which you do want to create new instances of, store or transfer. For a service where you
+only need one instance, classes do make sense. Their syntax for collecting a bunch of methods
+together with a factory to inject dependencies is pretty nice. You could do it without a class but
+why would you? You’ll probably just end up re-implmenting classes in a non standard way.</p>
+
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: 'https://rasmus.eneman.eu/i-dont-like-classes/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+
+    </main>
+    <footer class="site-footer">
+      <section class="copyright">
+        <a href="https://rasmus.eneman.eu">Rasmus Eneman</a> © 2015
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>
+        Some rights reserved
+      </section>
+    </footer>
+  </body>
+</html>

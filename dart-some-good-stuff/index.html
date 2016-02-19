@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dart, some good stuff</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Inconsolata:400,700|Roboto+Slab">
+
+    <link rel="canonical" href="https://rasmus.eneman.eu">
+    <meta name="referrer" content="origin">
+
+    <meta property="og:site_name" content="Rasmus Eneman">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rasmus Eneman">
+    <meta property="og:description" content="Studying web developer and politically interested">
+    <meta property="og:url" content="https://rasmus.eneman.eu">
+    <meta property="og:image" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rasmus Eneman">
+    <meta name="twitter:description" content="Studying web developer and politically interested">
+    <meta name="twitter:url" content="https://rasmus.eneman.eu">
+    <meta name="twitter:image:src" content="https://rasmus.eneman.euassets/bg/1109x499.JPG">
+
+    <script src="//www.google-analytics.com/analytics.js" async></script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Website",
+  "publisher": "Rasmus Eneman",
+  "url": "https://rasmus.eneman.eu",
+  "image": "https://rasmus.eneman.euassets/bg/1109x499.JPG",
+  "description": "Studying web developer and politically interested"
+}
+    </script>
+
+    <link rel="alternate" type="application/rss+xml" title="Rasmus Eneman" href="https://rasmus.eneman.eurss/">
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51338401-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      
+    <nav>
+      <a class="subscribe-button icon-feed" href="/rss/">Subscribe</a>
+      <a class="back-button icon-arrow-left" href="/">Home</a>
+    </nav>
+
+
+    </header>
+    <main>
+      
+    <article >
+      <header>
+        <h1>Dart, some good stuff</h1>
+        <section class="post-meta in-post">
+          <time datetime="1014-05-25T00:00:00.000Z">25 May 1014</time>
+        </section>
+      </header>
+
+      <section class="post-content">
+        <p><a href="https://www.dartlang.org/">Dart</a> is a new language for the web and in runs both on the client and the server, and it’s fantastic!
+So what is it that make it so good that one would pick it over a more proven and stable language?</p>
+<p>First, it’s new! Now that on itself isn’t particularly good, what’s good is that the Dart team have made a fabulous job at learning from previous art. Dart is inspired of Java, however the not so good parts is missing and other languages have been borrowed from instead, or new stuff have been invented.</p>
+<p>I will now pick some of the features I  love in Dart and are missing in other languages. This isn’t a complete list but is instead intended to highlight the features I like the most and haven’t seen before.</p>
+<h3>Optional types</h3>
+<p>Optional types is a wonderful invention that makes your code more readable and easier to type. In Dart you don’t have to specify the type, but you may if you want. In the Dart community it’s recommended to specify the type of the public API to make it easier to use and understand, but to not specify the type of your local variables as it’s usually very simple to pick up the types anyway. Just as with unnecessary comments, unnecessary type specifications make your code cluttered and harder to follow.</p>
+<p>Read more about Optional types on <a href="https://www.dartlang.org/articles/optional-types/">Optional Types in Dart</a></p>
+<h3>Named constructors</h3>
+<p>Dart support named constructors, a very simple feature that makes your code more readable if your classes supports more than one constructor. Look at this code</p>
+<pre><code class="language-dart"><span class="token keyword" >new</span> <span class="token class-name" >Point</span><span class="token punctuation" >(</span><span class="token number" >10</span><span class="token punctuation" >,</span> <span class="token number" >5</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token keyword" >new</span> <span class="token class-name" >Point<span class="token punctuation" >.</span>fromJson</span><span class="token punctuation" >(</span><span class="token punctuation" >{</span><span class="token string" >"x"</span><span class="token punctuation" >:</span><span class="token number" >10</span><span class="token punctuation" >,</span> <span class="token string" >"y"</span><span class="token punctuation" >:</span> <span class="token number" >5</span><span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>Having the Json compatible constructor named fromJson makes it very easy for everyone to understand what’s going on. And we are still keeping the constructor that takes two coordinates  very simple as it’s easy to understand anyway. Even if you used variables they would probably contain X and Y or something similar that makes it self explanatory anyway. We don’t want to clutter already self explanatory code.</p>
+<p>Read more about Named constrcturs on <a href="https://www.dartlang.org/dart-tips/dart-tips-ep-11.html">Classes: Constructors</a></p>
+<h3>Implicit interfaces</h3>
+<p>We all know that it’s a bad idea to bind directly to an implementation. Instead we should always bind to an interface. Now this will clutter your code if you only have one implementation of that interface as you need to write both the interface and the class implementing it. Everyone that have written Java know that you will clutter you code with</p>
+<pre><code class="language-java">List<span class="token operator" >&lt;</span>Point<span class="token operator" >></span> points <span class="token operator" >=</span> <span class="token keyword" >new</span> <span class="token class-name" >ArrayList</span><span class="token operator" >&lt;</span>Point<span class="token operator" >></span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>In Dart, all classes implicitly also is an interface. That means that List can be a class and it’s still possible to create a custom implementation of it.
+In other words, you’ll only ever need to write implementations. And whenever you think that you binds to an implementation, you actually binds to the interface that class implements. Making your codebase simpler while still following good OO principles.</p>
+<p>Read more about Implicit interfaces on <a href="https://www.dartlang.org/docs/dart-up-and-running/contents/ch02.html#ch02-implicit-interfaces">A Tour of the Dart Language</a></p>
+<h3>The cascade operator</h3>
+<p>This beautiful thing is so elegant in its simplicity that you just have to love it. Look at this code</p>
+<pre><code class="language-dart"><span class="token keyword" >var</span> point <span class="token operator" >=</span> <span class="token keyword" >new</span> <span class="token class-name" >Point</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span>
+    <span class="token punctuation" >.</span><span class="token punctuation" >.</span>x <span class="token operator" >=</span> <span class="token number" >10</span>
+    <span class="token punctuation" >.</span><span class="token punctuation" >.</span>y <span class="token operator" >=</span> <span class="token number" >5</span><span class="token punctuation" >;</span>
+</code></pre>
+<p>Now you probably already know what it does, even if you have never seen it before. What it does is create a new Point object using the default constructor, and then assign the x and y variable to it before assigning a reference to the object to the point variable. While this is simple it simplifies the code because you don’t need to have the constructor support every single variable on the object, just let it handle the required ones and then let the user set the reset using the cascade operator.</p>
+<p>Read more on the cascade operator on <a href="http://news.dartlang.org/2012/02/method-cascades-in-dart-posted-by-gilad.html">Method Cascades in Dart</a></p>
+<h3>Futures and Streams</h3>
+<p>Futures and Streams as two very nice techniques that together does a great job of dealing with asynchronous programming. Futures are a promise and are used where something happen exactly one time. For example that your GET request completed. Futures does also handle errors so that code listening on a future is promised to be notified that something completed or failed. Streams are for stuff that can happen multiple times, or never. Like that server listening for your GET request. It may receive one, a hundred, or it may not receive a single one.</p>
+<p>Read more about Futures on <a href="https://www.dartlang.org/docs/tutorials/futures/">Use Future-Based APIs</a> on Streams on <a href="https://www.dartlang.org/docs/tutorials/streams/">Use Streams for Data</a></p>
+<h2>Stinks</h2>
+<p>No one is perfect, not even Dart. I feel the need to rant about one thing.</p>
+<h4>Private variables</h4>
+<p>To create a private variable in Dart you prefix it with underline, like this <code>var _point = new Point();</code>. I hate this. The name of a variable should never, ever, alter the usage of that variable. Here Dart should choose between going with Java or Python.
+By going with Java they should add the <code>private</code> and <code>protected</code> modifiers. <code>public</code> is neither needed or wanted as that is the default behaviour and there should only ever be one obvious way to archive the same thing. If the instead go with Python they can keep the _ but it shouldn’t behave any differently than any other name. A variable prefixed with underline is by convention private and shouldn’t be tampered with, but may be as it’s just a variable like any other one.</p>
+<h2>Concluding remarks</h2>
+<p>While this hardly is even near a complete guide of what make Dart good I
+think that this is a nice little collection of <code>&quot;this is better than $language&quot;</code> whatever language you may be using. Dart also have additional goodies like factories, this. constructor variables and much more. Read about it on <a href="https://www.dartlang.org/docs/dart-up-and-running/contents/ch02.html">A Tour of the Dart Language</a>. We’ll see if I will continue this post later on with more specific ones about certain stuff.</p>
+<p>Now, should everyone just throw themselves as Dart? No not at all. Dart is very new and you will encounter one or two bugs, and if you are going to use some libraries (and your are) you will encounter bugs in those too. Everything is just too new and moving too fast to not have some rough edges. But it’s shaping up very well and I recommend everyone interested in web development to keep an eye on it.</p>
+
+      </section>
+    </article>
+
+    <aside>
+      <div id="comments"></div>
+      <script src="https://apis.google.com/js/plusone.js"></script>
+      <script>
+        var commentsWidth = document.getElementById('comments').offsetWidth;
+        window.addEventListener('load', function () {
+          gapi.comments.render('comments', {
+            href: 'https://rasmus.eneman.eu/dart-some-good-stuff/',
+            width: commentsWidth,
+            first_party_property: 'BLOGGER',
+            view_type: 'FILTERED_POSTMOD',
+          });
+        });
+     </script>
+    </aside>
+
+
+    </main>
+    <footer class="site-footer">
+      <section class="copyright">
+        <a href="https://rasmus.eneman.eu">Rasmus Eneman</a> © 2015
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA</a>
+        Some rights reserved
+      </section>
+    </footer>
+  </body>
+</html>
